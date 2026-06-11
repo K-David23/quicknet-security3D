@@ -1,0 +1,1249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quicknet Home Security — Secure with Confidence</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --cream: #F5F0E8;
+  --green: #1B4D3E;
+  --green2: #4A6741;
+  --red: #8B1A1A;
+  --gold: #C8A96E;
+  --dark: #0D1F1A;
+  --muted: #5F5E5A;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Outfit', sans-serif;
+  background: var(--dark);
+  color: var(--cream);
+  overflow-x: hidden;
+  cursor: none;
+}
+
+/* LOADING SCREEN */
+#loader {
+  position: fixed;
+  inset: 0;
+  background: var(--dark);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  transition: opacity 0.6s ease;
+}
+#loader.hidden { opacity: 0; pointer-events: none; }
+.loader-logo {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 28px;
+  color: var(--cream);
+  letter-spacing: 4px;
+}
+.loader-logo span { color: var(--gold); }
+.loader-bar-wrap {
+  width: 200px;
+  height: 1px;
+  background: rgba(245,240,232,0.1);
+}
+.loader-bar {
+  height: 1px;
+  width: 0%;
+  background: var(--gold);
+  transition: width 0.3s ease;
+}
+.loader-text {
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(245,240,232,0.3);
+}
+
+/* CURSOR */
+.cursor {
+  position: fixed;
+  width: 8px; height: 8px;
+  background: var(--gold);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9000;
+  transform: translate(-50%, -50%);
+  transition: transform 0.1s ease, width 0.2s, height 0.2s;
+}
+.cursor-ring {
+  position: fixed;
+  width: 32px; height: 32px;
+  border: 1px solid rgba(200,169,110,0.45);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 8999;
+  transform: translate(-50%, -50%);
+}
+
+/* NAV */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 1000;
+  padding: 1.25rem 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: background 0.4s, backdrop-filter 0.4s, border-color 0.4s;
+  border-bottom: 0.5px solid transparent;
+}
+nav.scrolled {
+  background: rgba(13,31,26,0.88);
+  backdrop-filter: blur(14px);
+  border-color: rgba(200,169,110,0.12);
+}
+.logo {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--cream);
+  letter-spacing: 3px;
+  text-decoration: none;
+}
+.logo span { color: var(--gold); }
+.logo-sub {
+  font-family: 'Outfit', sans-serif;
+  font-size: 11px;
+  font-weight: 400;
+  color: rgba(245, 240, 232, 0.6);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-left: 12px;
+  padding-left: 12px;
+  border-left: 1px solid rgba(200, 169, 110, 0.25);
+  transition: color 0.2s;
+}
+.logo:hover .logo-sub {
+  color: var(--gold);
+}
+.nav-links {
+  display: flex;
+  list-style: none;
+  gap: 2.5rem;
+  align-items: center;
+}
+.nav-links a {
+  color: rgba(245,240,232,0.6);
+  font-size: 11px;
+  font-weight: 500;
+  text-decoration: none;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  transition: color 0.2s;
+}
+.nav-links a:hover { color: var(--gold); }
+.nav-btn {
+  background: var(--red) !important;
+  color: var(--cream) !important;
+  padding: 10px 24px;
+  border-radius: 2px;
+}
+
+/* =====================
+   SCROLL SCRUB HERO
+   ===================== */
+
+/* The tall track gives scroll distance */
+#scroll-track {
+  height: 600vh;
+  position: relative;
+}
+
+/* Video sticks inside the track */
+#hero-video {
+  position: sticky;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  object-fit: cover;
+  display: block;
+  background: var(--dark);
+}
+
+/* Dark overlay on video */
+.video-overlay {
+  position: sticky;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  margin-top: -100vh;
+  background: linear-gradient(
+    to bottom,
+    rgba(13,31,26,0.35) 0%,
+    rgba(13,31,26,0.15) 50%,
+    rgba(13,31,26,0.6) 100%
+  );
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Text over video — fades out as user scrolls */
+.hero-text {
+  position: sticky;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  margin-top: -100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 0 3rem 5rem;
+  z-index: 3;
+  pointer-events: none;
+}
+.hero-text-inner {
+  max-width: 600px;
+  pointer-events: all;
+}
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 0.5px solid rgba(200,169,110,0.4);
+  padding: 7px 16px;
+  border-radius: 30px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 1.5rem;
+}
+.hero-dot {
+  width: 6px; height: 6px;
+  background: var(--gold);
+  border-radius: 50%;
+  animation: blink 2s infinite;
+}
+@keyframes blink {
+  0%,100% { opacity:1; } 50% { opacity:0.2; }
+}
+.hero-text h1 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 62px;
+  font-weight: 300;
+  line-height: 1.08;
+  margin-bottom: 1.25rem;
+  color: var(--cream);
+  text-shadow: 0 2px 30px rgba(0,0,0,0.5);
+}
+.hero-text h1 em {
+  font-style: italic;
+  color: var(--gold);
+}
+.hero-text h1 strong {
+  display: block;
+  font-weight: 600;
+}
+.hero-sub {
+  font-size: 15px;
+  color: rgba(245,240,232,0.65);
+  line-height: 1.75;
+  margin-bottom: 2rem;
+  font-weight: 300;
+  max-width: 420px;
+}
+.hero-actions {
+  display: flex;
+  gap: 1.25rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.btn-main {
+  background: var(--red);
+  color: var(--cream);
+  padding: 15px 34px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  text-decoration: none;
+  border-radius: 2px;
+  transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+  display: inline-block;
+}
+.btn-main:hover {
+  background: #a32020;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(139,26,26,0.4);
+}
+.btn-call {
+  color: rgba(245,240,232,0.7);
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  letter-spacing: 0.5px;
+  transition: color 0.2s;
+}
+.btn-call:hover { color: var(--gold); }
+
+/* Scroll hint */
+.scroll-hint {
+  position: sticky;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  margin-top: -100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  padding-bottom: 2rem;
+  z-index: 4;
+  pointer-events: none;
+}
+.scroll-hint-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  opacity: 0.5;
+}
+.scroll-hint-inner span {
+  font-size: 9px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--cream);
+}
+.scroll-line {
+  width: 1px; height: 40px;
+  background: linear-gradient(to bottom, var(--gold), transparent);
+  animation: scanDown 1.8s ease-in-out infinite;
+}
+@keyframes scanDown {
+  0% { transform: scaleY(0); transform-origin: top; opacity: 1; }
+  50% { transform: scaleY(1); transform-origin: top; opacity: 1; }
+  51% { transform-origin: bottom; }
+  100% { transform: scaleY(0); transform-origin: bottom; opacity: 0; }
+}
+
+/* Progress bar */
+#progress-bar {
+  position: fixed;
+  top: 0; left: 0;
+  height: 2px;
+  width: 0%;
+  background: linear-gradient(to right, var(--green), var(--gold));
+  z-index: 2000;
+  transition: width 0.1s linear;
+}
+
+/* =====================
+   SECTIONS
+   ===================== */
+.section {
+  padding: 7rem 3rem;
+  position: relative;
+}
+
+/* reveal animation */
+.reveal {
+  opacity: 0;
+  transform: translateY(48px);
+  transition: opacity 0.75s ease, transform 0.75s ease;
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.eyebrow {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 0.6rem;
+}
+.divider {
+  width: 50px; height: 1px;
+  background: linear-gradient(to right, var(--gold), transparent);
+  margin: 0.75rem 0 1.5rem;
+}
+.display {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 48px;
+  font-weight: 300;
+  line-height: 1.1;
+  margin-bottom: 1rem;
+}
+.display em { font-style: italic; color: var(--gold); }
+.body-copy {
+  font-size: 15px;
+  line-height: 1.8;
+  font-weight: 300;
+  max-width: 500px;
+  margin-bottom: 3.5rem;
+}
+
+/* SERVICES */
+.section-services {
+  background: var(--green);
+}
+.section-services .eyebrow { color: rgba(200,169,110,0.8); }
+.section-services .body-copy { color: rgba(245,240,232,0.55); }
+
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+}
+
+.card {
+  background: rgba(245,240,232,0.05);
+  border: 0.5px solid rgba(245,240,232,0.1);
+  border-radius: 6px;
+  padding: 2rem 1.5rem;
+  transition: background 0.3s, border-color 0.3s, transform 0.1s;
+  transform-style: preserve-3d;
+  will-change: transform;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+}
+.card:hover {
+  background: rgba(245,240,232,0.09);
+  border-color: rgba(200,169,110,0.3);
+}
+.card-img-wrapper {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.4s ease, visibility 0.4s ease;
+  z-index: 2;
+  border-radius: 6px;
+  overflow: hidden;
+}
+.card-img-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s ease;
+}
+.card.show-img .card-img-wrapper {
+  opacity: 1;
+  visibility: visible;
+}
+.card.show-img .card-img-wrapper img {
+  transform: scale(1.05);
+}
+.card-img-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s;
+  color: white;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+.card.show-img:hover .card-img-overlay {
+  opacity: 1;
+}
+.card-num {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 38px;
+  font-weight: 300;
+  color: rgba(200,169,110,0.18);
+  line-height: 1;
+  margin-bottom: 0.85rem;
+}
+.card-bar {
+  width: 24px; height: 2px;
+  background: var(--red);
+  margin-bottom: 0.85rem;
+}
+.card h4 {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--cream);
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.3px;
+}
+.card p {
+  font-size: 13px;
+  color: rgba(245,240,232,0.5);
+  line-height: 1.65;
+  font-weight: 300;
+}
+
+/* WHY US */
+.section-why {
+  background: var(--cream);
+  color: var(--dark);
+}
+.section-why .eyebrow { color: var(--green2); }
+.section-why .display { color: var(--green); }
+.section-why .body-copy { color: var(--muted); }
+
+.why-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5rem;
+  align-items: start;
+}
+.why-items { display: flex; flex-direction: column; gap: 1.25rem; margin-top: 1rem; }
+.why-item {
+  border-left: 2px solid var(--green);
+  padding: 1.25rem 1.25rem 1.25rem 1.5rem;
+  background: rgba(27,77,62,0.04);
+  border-radius: 0 6px 6px 0;
+  transition: background 0.25s, transform 0.25s;
+}
+.why-item:hover { background: rgba(27,77,62,0.08); transform: translateX(5px); }
+.why-item-num {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 26px;
+  color: var(--red);
+  font-weight: 300;
+  line-height: 1;
+  margin-bottom: 0.35rem;
+}
+.why-item h4 { font-size: 14px; font-weight: 600; color: var(--green); margin-bottom: 0.3rem; }
+.why-item p { font-size: 13px; color: var(--muted); line-height: 1.65; font-weight: 300; }
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-top: 2.5rem;
+}
+.stat {
+  border: 0.5px solid rgba(27,77,62,0.15);
+  border-radius: 6px;
+  padding: 1.5rem 1.25rem;
+  background: rgba(27,77,62,0.03);
+}
+.stat-num {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 40px;
+  font-weight: 300;
+  color: var(--green);
+  line-height: 1;
+  margin-bottom: 0.3rem;
+}
+.stat-label { font-size: 12px; color: var(--muted); font-weight: 300; line-height: 1.5; }
+
+/* CONTACT */
+.section-contact {
+  background: var(--dark);
+}
+.contact-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5rem;
+  align-items: start;
+}
+.contact-cards { display: flex; flex-direction: column; gap: 0.85rem; }
+.contact-card {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 1.25rem 1.5rem;
+  background: rgba(245,240,232,0.04);
+  border: 0.5px solid rgba(245,240,232,0.09);
+  border-radius: 6px;
+  text-decoration: none;
+  transition: background 0.25s, border-color 0.25s, transform 0.25s;
+}
+.contact-card:hover {
+  background: rgba(245,240,232,0.08);
+  border-color: rgba(200,169,110,0.25);
+  transform: translateX(5px);
+}
+.cc-icon {
+  width: 44px; height: 44px;
+  background: rgba(200,169,110,0.1);
+  border: 0.5px solid rgba(200,169,110,0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.cc-label {
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(245,240,232,0.3);
+  margin-bottom: 0.3rem;
+}
+.cc-val { font-size: 15px; color: var(--cream); font-weight: 500; }
+
+.no-contract {
+  margin-top: 1.25rem;
+  padding: 1.1rem 1.4rem;
+  background: rgba(139,26,26,0.15);
+  border: 0.5px solid rgba(139,26,26,0.3);
+  border-radius: 6px;
+  font-size: 13px;
+  color: rgba(245,240,232,0.7);
+  line-height: 1.65;
+}
+.no-contract strong { color: var(--cream); }
+
+.managers {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+.manager {
+  flex: 1;
+  padding: 1.4rem;
+  background: rgba(245,240,232,0.04);
+  border: 0.5px solid rgba(245,240,232,0.09);
+  border-radius: 6px;
+  text-align: center;
+}
+.manager-av {
+  width: 50px; height: 50px;
+  border-radius: 50%;
+  background: var(--green);
+  border: 0.5px solid rgba(200,169,110,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 17px;
+  color: var(--gold);
+  margin: 0 auto 0.75rem;
+}
+.manager-name { font-size: 13px; font-weight: 600; color: var(--cream); margin-bottom: 0.2rem; }
+.manager-role { font-size: 10px; color: rgba(245,240,232,0.35); letter-spacing: 1px; text-transform: uppercase; }
+
+/* FOOTER */
+footer {
+  background: #07120F;
+  padding: 1.5rem 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  border-top: 0.5px solid rgba(200,169,110,0.08);
+}
+.footer-logo {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 15px;
+  color: rgba(245,240,232,0.35);
+}
+.footer-logo span { color: var(--gold); }
+.kd-brand-inscription {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: rgba(245, 240, 232, 0.4);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  transition: color 0.3s ease;
+}
+.kd-brand-inscription:hover {
+  color: var(--gold);
+}
+.kd-brand-inscription svg {
+  height: 22px;
+  width: auto;
+  transition: transform 0.3s ease;
+}
+.kd-brand-inscription:hover svg {
+  transform: scale(1.08);
+}
+footer p { font-size: 11px; color: rgba(245,240,232,0.2); letter-spacing: 0.5px; }
+/* SECTION HARDWARE */
+.section-hardware {
+  background: var(--dark);
+  color: var(--cream);
+}
+.hw-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+}
+.hw-viewer {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  background: radial-gradient(circle at center, rgba(27,77,62,0.2) 0%, transparent 60%);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.hw-viewer img {
+  width: 85%;
+  height: 85%;
+  object-fit: contain;
+  filter: drop-shadow(0 20px 40px rgba(0,0,0,0.6));
+  transition: opacity 0.5s ease, transform 0.5s ease;
+  position: absolute;
+  opacity: 0;
+  transform: scale(0.95);
+  pointer-events: none;
+}
+.hw-viewer img.active {
+  opacity: 1;
+  transform: scale(1);
+}
+.hw-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.hw-item {
+  border: 1px solid rgba(245,240,232,0.1);
+  border-radius: 8px;
+  background: rgba(245,240,232,0.02);
+  cursor: pointer;
+  overflow: hidden;
+  transition: border-color 0.3s, background 0.3s;
+}
+.hw-item:hover {
+  background: rgba(245,240,232,0.05);
+}
+.hw-item.active {
+  border-color: var(--gold);
+  background: rgba(200,169,110,0.05);
+}
+.hw-item-header {
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.hw-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--cream);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.hw-icon {
+  font-size: 20px;
+}
+.hw-indicator {
+  font-size: 24px;
+  line-height: 1;
+  font-weight: 300;
+  color: var(--gold);
+  transition: transform 0.3s;
+}
+.hw-item.active .hw-indicator {
+  transform: rotate(45deg);
+}
+.hw-content {
+  padding: 0 1.5rem;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease, padding 0.4s ease;
+  font-size: 14px;
+  color: rgba(245,240,232,0.6);
+  line-height: 1.6;
+}
+.hw-item.active .hw-content {
+  padding: 0 1.5rem 1.5rem 1.5rem;
+  max-height: 200px;
+}
+
+/* MOBILE */
+@media (max-width: 768px) {
+  body { cursor: auto; }
+  .cursor, .cursor-ring { display: none; }
+  .logo-sub { display: none; }
+  nav { padding: 1rem 1.5rem; }
+  .nav-links li:not(:last-child) { display: none; }
+  #scroll-track { height: 100vh; }
+  #hero-video { position: relative; top: auto; }
+  .video-overlay, .hero-text, .scroll-hint { position: absolute; }
+  .hero-text h1 { font-size: 38px; }
+  .hero-text { padding: 0 1.5rem 3.5rem; }
+  .section { padding: 4.5rem 1.5rem; }
+  .cards-grid { grid-template-columns: 1fr; }
+  .why-layout { grid-template-columns: 1fr; gap: 2.5rem; }
+  .contact-layout { grid-template-columns: 1fr; gap: 2.5rem; }
+  .display { font-size: 34px; }
+  .hw-layout { grid-template-columns: 1fr; gap: 2rem; }
+  footer { padding: 1.25rem 1.5rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- LOADER -->
+<div id="loader">
+  <div class="loader-logo">Q<span>.</span>H<span>.</span>S</div>
+  <div class="loader-bar-wrap"><div class="loader-bar" id="loader-bar"></div></div>
+  <div class="loader-text">Loading security system...</div>
+</div>
+
+<!-- PROGRESS BAR -->
+<div id="progress-bar"></div>
+
+<!-- CURSOR -->
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursor-ring"></div>
+
+<!-- NAV -->
+<nav id="navbar">
+  <a href="#" class="logo">Q<span>.</span>H<span>.</span>S <span class="logo-sub">Quicknet Home Security</span></a>
+  <ul class="nav-links">
+    <li><a href="#services">Services</a></li>
+    <li><a href="#why">Why Us</a></li>
+    <li><a href="#contact">Contact</a></li>
+    <li><a href="tel:13475927733" class="nav-btn">Free Quote</a></li>
+  </ul>
+</nav>
+
+<!-- =====================
+     SCROLL SCRUB HERO
+     ===================== -->
+<div id="scroll-track">
+
+  <!-- VIDEO — sticky, controlled by scroll -->
+  <video
+    id="hero-video"
+    preload="auto"
+    webkit-playsinline
+  >
+    <source src="camera.mp4" type="video/mp4">
+  </video>
+
+  <!-- Dark overlay -->
+  <div class="video-overlay"></div>
+
+  <!-- Hero text -->
+  <div class="hero-text">
+    <div class="hero-text-inner">
+      <div class="hero-badge">
+        <div class="hero-dot"></div>
+        Family-owned &amp; operated
+      </div>
+      <h1>
+        Security you<br>
+        can <em>trust.</em>
+        <strong>People you can call.</strong>
+      </h1>
+      <p class="hero-sub">Big brands give you a contract. We give you Mark and Juliet Harvey — real people who answer the phone and make sure your property is protected right.</p>
+      <div class="hero-actions">
+        <a href="tel:13475927733" class="btn-main">Get a Free Quote</a>
+        <a href="tel:13475927733" class="btn-call">↓ Scroll to see more</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scroll hint -->
+  <div class="scroll-hint">
+    <div class="scroll-hint-inner">
+      <span>Scroll</span>
+      <div class="scroll-line"></div>
+    </div>
+  </div>
+
+</div><!-- end scroll-track -->
+
+<!-- TRUST BAR -->
+<div style="background:#0A1A15;padding:1rem 3rem;display:flex;justify-content:space-around;flex-wrap:wrap;gap:1rem;border-top:0.5px solid rgba(200,169,110,0.1);border-bottom:0.5px solid rgba(200,169,110,0.1);">
+  <div style="display:flex;align-items:center;gap:8px;font-size:11px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:rgba(245,240,232,0.5)"><div style="width:5px;height:5px;background:var(--gold);border-radius:50%"></div>Licensed &amp; Insured</div>
+  <div style="display:flex;align-items:center;gap:8px;font-size:11px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:rgba(245,240,232,0.5)"><div style="width:5px;height:5px;background:var(--gold);border-radius:50%"></div>No Hidden Fees</div>
+  <div style="display:flex;align-items:center;gap:8px;font-size:11px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:rgba(245,240,232,0.5)"><div style="width:5px;height:5px;background:var(--gold);border-radius:50%"></div>Business &amp; Residential</div>
+  <div style="display:flex;align-items:center;gap:8px;font-size:11px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:rgba(245,240,232,0.5)"><div style="width:5px;height:5px;background:var(--gold);border-radius:50%"></div>Local Experts</div>
+  <div style="display:flex;align-items:center;gap:8px;font-size:11px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:rgba(245,240,232,0.5)"><div style="width:5px;height:5px;background:var(--gold);border-radius:50%"></div>Free Quotation</div>
+</div>
+
+<!-- SERVICES -->
+<section class="section section-services" id="services">
+  <div class="reveal">
+    <div class="eyebrow">What we do</div>
+    <div class="divider"></div>
+    <div class="display" style="color:var(--cream)">Complete surveillance<br><em>solutions.</em></div>
+    <p class="body-copy">From a single camera to a full multi-building system — plain English, no upsells, no confusion, no surprise fees.</p>
+  </div>
+  <div class="cards-grid">
+    <div class="card reveal" style="transition-delay:0.05s" onclick="this.classList.toggle('show-img')">
+      <div class="card-num">01</div><div class="card-bar"></div>
+      <h4>Smart Camera Installation</h4>
+      <p>Indoor and outdoor cameras professionally mounted and configured for your exact property layout.</p>
+      <div class="card-img-wrapper">
+        <img src="service_1.png" alt="Smart Camera Installation">
+        <div class="card-img-overlay">Click to close</div>
+      </div>
+    </div>
+    <div class="card reveal" style="transition-delay:0.1s" onclick="this.classList.toggle('show-img')">
+      <div class="card-num">02</div><div class="card-bar"></div>
+      <h4>POE &amp; BNC Systems</h4>
+      <p>Power-over-ethernet and coaxial BNC connections built for reliability and crystal-clear footage.</p>
+      <div class="card-img-wrapper">
+        <img src="service_2.png" alt="POE & BNC Systems">
+        <div class="card-img-overlay">Click to close</div>
+      </div>
+    </div>
+    <div class="card reveal" style="transition-delay:0.15s" onclick="this.classList.toggle('show-img')">
+      <div class="card-num">03</div><div class="card-bar"></div>
+      <h4>Structural Cabling</h4>
+      <p>Cat5e, Cat6e, and coaxial cabling neatly routed and crimped clean through walls and ceilings.</p>
+      <div class="card-img-wrapper">
+        <img src="service_3.png" alt="Structural Cabling">
+        <div class="card-img-overlay">Click to close</div>
+      </div>
+    </div>
+    <div class="card reveal" style="transition-delay:0.2s" onclick="this.classList.toggle('show-img')">
+      <div class="card-num">04</div><div class="card-bar"></div>
+      <h4>Internet Access Points</h4>
+      <p>Punch-down wiring for strong reliable Wi-Fi coverage throughout your entire building.</p>
+      <div class="card-img-wrapper">
+        <img src="service_4.png" alt="Internet Access Points">
+        <div class="card-img-overlay">Click to close</div>
+      </div>
+    </div>
+    <div class="card reveal" style="transition-delay:0.25s" onclick="this.classList.toggle('show-img')">
+      <div class="card-num">05</div><div class="card-bar"></div>
+      <h4>DVR / NVR Setup</h4>
+      <p>Full programming for remote viewing — watch your cameras from your phone anywhere, anytime.</p>
+      <div class="card-img-wrapper">
+        <img src="service_5.png" alt="DVR / NVR Setup">
+        <div class="card-img-overlay">Click to close</div>
+      </div>
+    </div>
+    <div class="card reveal" style="transition-delay:0.3s" onclick="this.classList.toggle('show-img')">
+      <div class="card-num">06</div><div class="card-bar"></div>
+      <h4>System Maintenance</h4>
+      <p>Ongoing upkeep so your cameras stay sharp, updated, and recording when it matters most.</p>
+      <div class="card-img-wrapper">
+        <img src="service_6.png" alt="System Maintenance">
+        <div class="card-img-overlay">Click to close</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION HARDWARE -->
+<section class="section section-hardware" id="hardware">
+  <div class="reveal">
+    <div class="eyebrow eyebrow-light">Premium Hardware</div>
+    <div class="divider"></div>
+    <div class="display" style="color:var(--cream)">State-of-the-art<br><em>surveillance.</em></div>
+    <p class="body-copy" style="color:rgba(245,240,232,0.55)">We use industry-leading, reliable hardware built for high-performance monitoring. No proprietary lock-ins, just solid equipment you fully own.</p>
+  </div>
+
+  <div class="hw-layout reveal" style="transition-delay:0.2s">
+    <div class="hw-viewer">
+      <img src="doorbell_camera.png" alt="Doorbell Camera" id="img-doorbell" class="active">
+      <img src="outdoor_camera.png" alt="Outdoor Camera" id="img-outdoor">
+      <img src="indoor_camera.png" alt="Indoor Camera" id="img-indoor">
+    </div>
+    
+    <div class="hw-list">
+      <div class="hw-item active" data-target="img-doorbell">
+        <div class="hw-item-header">
+          <div class="hw-title"><span class="hw-icon" style="display:flex"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg></span> Smart Doorbell Camera Pro</div>
+          <div class="hw-indicator">+</div>
+        </div>
+        <div class="hw-content">
+          Protect your door and packages with AI-driven package protection, featuring an exclusive 180° x 180° field of view and instant delivery notifications directly to your phone.
+        </div>
+      </div>
+      
+      <div class="hw-item" data-target="img-outdoor">
+        <div class="hw-item-header">
+          <div class="hw-title"><span class="hw-icon" style="display:flex"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg></span> Outdoor Camera Pro</div>
+          <div class="hw-indicator">+</div>
+        </div>
+        <div class="hw-content">
+          Weatherproof active deterrent camera that smartly identifies threats and warns trespassers with light and sound before they even reach your property. 4K HDR vision included.
+        </div>
+      </div>
+      
+      <div class="hw-item" data-target="img-indoor">
+        <div class="hw-item-header">
+          <div class="hw-title"><span class="hw-icon" style="display:flex"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg></span> Indoor Camera</div>
+          <div class="hw-indicator">+</div>
+        </div>
+        <div class="hw-content">
+          Sleek, minimalist interior monitoring. Stay connected to your family or business with crystal-clear video and two-way talk, all secured with local storage to protect your privacy.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WHY US -->
+<section class="section section-why" id="why">
+  <div class="why-layout">
+    <div>
+      <div class="reveal">
+        <div class="eyebrow">Why Quicknet</div>
+        <div class="divider" style="background:linear-gradient(to right,var(--green),transparent)"></div>
+        <div class="display">What the big brands<br><em style="color:var(--red)">won't tell you.</em></div>
+        <p class="body-copy">ADT, Vivint, and Ring are well-known — but they're not local, not flexible, and they don't pick up on the first ring.</p>
+      </div>
+      <div class="stat-grid">
+        <div class="stat reveal" style="transition-delay:0.1s">
+          <div class="stat-num">100%</div>
+          <div class="stat-label">You own your system — no subscription to see your cameras</div>
+        </div>
+        <div class="stat reveal" style="transition-delay:0.15s">
+          <div class="stat-num">0</div>
+          <div class="stat-label">Contracts — ever. Quote the job, do the job.</div>
+        </div>
+        <div class="stat reveal" style="transition-delay:0.2s">
+          <div class="stat-num">Same</div>
+          <div class="stat-label">Day response, 7 days a week including weekends</div>
+        </div>
+        <div class="stat reveal" style="transition-delay:0.25s">
+          <div class="stat-num">Real</div>
+          <div class="stat-label">People answer — not a call center, not a chatbot</div>
+        </div>
+      </div>
+    </div>
+    <div class="why-items">
+      <div class="why-item reveal" style="transition-delay:0.05s">
+        <div class="why-item-num">01</div>
+        <h4>No long-term contracts</h4>
+        <p>Big brands lock you in for 2–5 years. We earn your trust the old-fashioned way.</p>
+      </div>
+      <div class="why-item reveal" style="transition-delay:0.1s">
+        <div class="why-item-num">02</div>
+        <h4>Transparent pricing</h4>
+        <p>Clear quote before we touch anything. No surprise fees, no markups, no monitoring traps.</p>
+      </div>
+      <div class="why-item reveal" style="transition-delay:0.15s">
+        <div class="why-item-num">03</div>
+        <h4>You own your system</h4>
+        <p>We install it, you own it fully. No monthly subscription to access your own cameras.</p>
+      </div>
+      <div class="why-item reveal" style="transition-delay:0.2s">
+        <div class="why-item-num">04</div>
+        <h4>Real human support</h4>
+        <p>Call Mark or Juliet directly — the actual people who installed your system.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section class="section section-contact" id="contact">
+  <div class="contact-layout">
+    <div class="reveal">
+      <div class="eyebrow">Get in touch</div>
+      <div class="divider"></div>
+      <div class="contact-cards">
+        <a href="tel:13475927733" class="contact-card">
+          <div class="cc-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg></div>
+          <div><div class="cc-label">Call or text</div><div class="cc-val">1-347-592-7733</div></div>
+        </a>
+        <a href="tel:13477054431" class="contact-card">
+          <div class="cc-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg></div>
+          <div><div class="cc-label">Second line</div><div class="cc-val">1-347-705-4431</div></div>
+        </a>
+        <a href="mailto:quicknethome.s@gmail.com" class="contact-card">
+          <div class="cc-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg></div>
+          <div><div class="cc-label">Email us</div><div class="cc-val">quicknethome.s@gmail.com</div></div>
+        </a>
+      </div>
+      <div class="no-contract">
+        <strong>No contracts. No commitments.</strong> Just a free quote to fit your budget — we respond the same day, 7 days a week.
+      </div>
+    </div>
+    <div class="reveal" style="transition-delay:0.15s">
+      <div class="eyebrow">Meet the team</div>
+      <div class="divider"></div>
+      <div class="display" style="font-size:38px">Let's secure your<br><em>property today.</em></div>
+      <p class="body-copy" style="color:rgba(245,240,232,0.5)">Get a free no-pressure quote. We personally oversee every installation from first cable run to final remote-viewing setup.</p>
+      <div class="managers">
+        <div class="manager">
+          <div class="manager-av">MH</div>
+          <div class="manager-name">Mark Harvey</div>
+          <div class="manager-role">Manager</div>
+        </div>
+        <div class="manager">
+          <div class="manager-av">JH</div>
+          <div class="manager-name">Juliet Harvey</div>
+          <div class="manager-role">Manager</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-logo">Quicknet Home Security <span>(Q.H.S)</span> LLC</div>
+  <a href="https://www.kdstudy.com" target="_blank" class="kd-brand-inscription" title="KD Tech">
+    <span class="kd-text">Powered by</span>
+    <svg class="kd-logo" viewBox="0 0 130 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M10 5V35" stroke="url(#goldGrad)" stroke-width="5" stroke-linecap="round"/>
+      <path d="M10 20L28 5" stroke="url(#goldGrad)" stroke-width="5" stroke-linecap="round"/>
+      <path d="M10 20L28 35" stroke="url(#goldGrad)" stroke-width="5" stroke-linecap="round"/>
+      <path d="M40 5H50C60 5 67 12 67 20C67 28 60 35 50 35H40V5Z" stroke="url(#goldGrad)" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
+      <text x="75" y="25" fill="#F5F0E8" font-family="'Outfit', sans-serif" font-size="15" font-weight="600" letter-spacing="1">TECH</text>
+      <defs>
+        <linearGradient id="goldGrad" x1="10" y1="5" x2="67" y2="35" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stop-color="#C8A96E"/>
+          <stop offset="100%" stop-color="#E5C78F"/>
+        </linearGradient>
+      </defs>
+    </svg>
+  </a>
+  <p>Secure with confidence &nbsp;·&nbsp; © 2026</p>
+</footer>
+
+<script>
+gsap.registerPlugin(ScrollTrigger);
+
+// ── CURSOR ──
+const cur = document.getElementById('cursor');
+const ring = document.getElementById('cursor-ring');
+let mx = 0, my = 0, rx = 0, ry = 0;
+
+document.addEventListener('mousemove', e => {
+  mx = e.clientX; my = e.clientY;
+  cur.style.left = mx + 'px';
+  cur.style.top = my + 'px';
+});
+(function animRing() {
+  rx += (mx - rx) * 0.1;
+  ry += (my - ry) * 0.1;
+  ring.style.left = rx + 'px';
+  ring.style.top = ry + 'px';
+  requestAnimationFrame(animRing);
+})();
+document.querySelectorAll('a, .card, .why-item, .contact-card, .hw-item').forEach(el => {
+  el.addEventListener('mouseenter', () => { cur.style.width = '20px'; cur.style.height = '20px'; ring.style.width = '50px'; ring.style.height = '50px'; });
+  el.addEventListener('mouseleave', () => { cur.style.width = '8px'; cur.style.height = '8px'; ring.style.width = '32px'; ring.style.height = '32px'; });
+});
+
+// ── NAV ──
+window.addEventListener('scroll', () => {
+  document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 60);
+  const total = document.body.scrollHeight - window.innerHeight;
+  document.getElementById('progress-bar').style.width = (window.scrollY / total * 100) + '%';
+});
+
+// ── VIDEO SCROLL SCRUB ──
+const video = document.getElementById('hero-video');
+const track = document.getElementById('scroll-track');
+
+// Force video completely frozen on load
+video.autoplay = false;
+video.loop = false;
+video.pause();
+video.currentTime = 0;
+
+// Only move the video when the user scrolls
+video.addEventListener('loadedmetadata', () => {
+  video.pause();
+  video.currentTime = 0;
+
+  let target = 0;
+
+  // ScrollTrigger smooths the scroll progress (scrub eases the target)
+  ScrollTrigger.create({
+    trigger: '#scroll-track',
+    start: 'top top',
+    end: 'bottom bottom',
+    scrub: 1,
+    onUpdate: (self) => {
+      target = self.progress * video.duration;
+    }
+  });
+
+  // Independent rAF loop applies seeks — but only when the browser
+  // is not already seeking, so requests never pile up and freeze the video.
+  function tick() {
+    if (isFinite(target) && !video.seeking && Math.abs(video.currentTime - target) > 0.03) {
+      video.currentTime = target;
+    }
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+
+  document.getElementById('loader').classList.add('hidden');
+});
+
+// Load the video but never play it
+video.load();
+
+// Animate loader bar + fallback hide after 4s so loader never blocks the page
+(function () {
+  let prog = 0;
+  const bar = document.getElementById('loader-bar');
+  const fake = setInterval(() => {
+    prog = Math.min(prog + 8, 90);
+    if (bar) bar.style.width = prog + '%';
+  }, 120);
+
+  const finishLoader = () => {
+    clearInterval(fake);
+    if (bar) bar.style.width = '100%';
+    document.getElementById('loader').classList.add('hidden');
+  };
+
+  video.addEventListener('loadedmetadata', finishLoader, { once: true });
+  setTimeout(finishLoader, 4000);
+})();
+
+// Kill autoplay on mobile too
+if (window.innerWidth <= 768) {
+  video.pause();
+  video.currentTime = 0;
+}
+
+// ── CARD 3D TILT ──
+document.querySelectorAll('.card').forEach(card => {
+  card.addEventListener('mousemove', e => {
+    const r = card.getBoundingClientRect();
+    const x = (e.clientX - r.left) / r.width - 0.5;
+    const y = (e.clientY - r.top) / r.height - 0.5;
+    card.style.transform = `perspective(600px) rotateX(${-y * 12}deg) rotateY(${x * 12}deg) translateY(-6px)`;
+  });
+  card.addEventListener('mouseleave', () => { card.style.transform = ''; });
+});
+
+// ── SCROLL REVEAL ──
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.1 });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// ── HARDWARE ACCORDION ──
+document.querySelectorAll('.hw-item').forEach(item => {
+  item.addEventListener('click', () => {
+    document.querySelectorAll('.hw-item').forEach(i => i.classList.remove('active'));
+    item.classList.add('active');
+    const targetId = item.getAttribute('data-target');
+    document.querySelectorAll('.hw-viewer img').forEach(img => img.classList.remove('active'));
+    document.getElementById(targetId).classList.add('active');
+  });
+});
+</script>
+</body>
+</html>
